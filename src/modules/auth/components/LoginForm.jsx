@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
-import useAuth from '../hook/useAuth';
+import useAuth from '../hooks/useAuth';
 import { frontendErrorMessage } from '../helpers/backendError';
 
 function LoginForm({ redirectPath, title }) {
