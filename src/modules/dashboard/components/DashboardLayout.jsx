@@ -4,12 +4,27 @@ import useAuth from '../../auth/hook/useAuth';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const navigate = useNavigate();
   const { singout } = useAuth();
 
-  const handleLogout = () => {
-    singout();
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    setLogoutError('');
+    setIsSigningOut(true);
+
+    const { error } = await singout();
+
+    setIsSigningOut(false);
+
+    if (error) {
+      setLogoutError(error);
+
+      return;
+    }
+
+    navigate('/admin/login', { replace: true });
   };
 
   const navItems = [
@@ -141,7 +156,9 @@ function DashboardLayout() {
         {/* Footer Sidebar (Help, Logout & User profile) */}
         <div className="p-4 border-t border-med-border-subtle space-y-3">
           <button
+            type="button"
             onClick={handleLogout}
+            disabled={isSigningOut}
             className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-med-text-sub hover:text-red-600 hover:bg-red-50 rounded-lg transition"
           >
             <svg
@@ -157,7 +174,7 @@ function DashboardLayout() {
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               />
             </svg>
-            <span>Cerrar Sesión</span>
+            <span>{isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}</span>
           </button>
 
           {/* User Profile Info */}
@@ -219,6 +236,14 @@ function DashboardLayout() {
 
         {/* Contenido de Rutas Hijas */}
         <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
+          {logoutError && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            >
+              {logoutError}
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

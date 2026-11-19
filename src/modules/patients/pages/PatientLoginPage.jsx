@@ -3,39 +3,58 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import useAuth from '../../auth/hook/useAuth';
-import { frontendErrorMessage } from '../../auth/helpers/backendError';
-
 function PatientLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showDni, setShowDni] = useState(false);
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm({ defaultValues: { username: '', password: '' } });
+    formState: { errors, isSubmitting },
+  } = useForm({ defaultValues: { email: '', dni: '' } });
 
   const navigate = useNavigate();
   const { singinPatient } = useAuth();
 
   const onValid = async (formData) => {
+    setErrorMessage('');
     try {
       const { error } = await singinPatient(
-        formData.username,
-        formData.password
+        formData.email.trim(),
+        Number(formData.dni)
       );
 
       if (error) {
-        setErrorMessage(error.frontendErrorMessage || 'Credenciales inválidas');
+        setErrorMessage(
+          error.frontendErrorMessage || 'No se pudo iniciar sesión'
+        );
 
         return;
       }
 
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
+      const status = error.response?.status;
+
+      if (status === 401) {
+        setErrorMessage(
+          'El correo y el DNI no coinciden con una cuenta válida.'
+        );
+      } else if (status === 429) {
+        setErrorMessage(
+          'Realizaste demasiados intentos. Esperá un minuto y volvé a intentar.'
+        );
+      } else if (status >= 500) {
+        setErrorMessage(
+          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
+        );
+      } else if (error.response) {
+        setErrorMessage(
+          error.response.data?.message || 'No se pudo iniciar sesión.'
+        );
       } else {
-        setErrorMessage('Error al conectar con el servicio de pacientes');
+        setErrorMessage(
+          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
+        );
       }
     }
   };
@@ -75,7 +94,11 @@ function PatientLoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-4">
+        <form
+          noValidate
+          onSubmit={handleSubmit(onValid)}
+          className="flex flex-col gap-4"
+        >
           {/* Correo Electrónico */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-main">
@@ -101,18 +124,22 @@ function PatientLoginPage() {
                 type="email"
                 placeholder="paciente@medportal.com"
                 className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                  errors.username
+                  errors.email
                     ? 'border-red-400 bg-red-50/20'
                     : 'border-med-border'
                 }`}
-                {...register('username', {
+                {...register('email', {
                   required: 'El correo electrónico es obligatorio',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+                    message: 'Ingresá un correo electrónico válido',
+                  },
                 })}
               />
             </div>
-            {errors.username && (
+            {errors.email && (
               <p className="text-xs text-red-500 font-medium">
-                {errors.username.message}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -120,7 +147,7 @@ function PatientLoginPage() {
           {/* Contraseña con botón mostrar/ocultar */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-main">
-              Contraseña
+              DNI
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-med-text-muted">
@@ -139,29 +166,32 @@ function PatientLoginPage() {
                 </svg>
               </span>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showDni ? 'text' : 'password'}
+                inputMode="numeric"
+                maxLength={8}
                 placeholder="••••••••"
                 className={`w-full border rounded-lg pl-10 pr-10 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                  errors.password
+                  errors.dni
                     ? 'border-red-400 bg-red-50/20'
                     : 'border-med-border'
                 }`}
-                {...register('password', {
-                  required: 'La contraseña es obligatoria',
+                {...register('dni', {
+                  required: 'El DNI es obligatorio',
+                  pattern: {
+                    value: /^[1-9]\d{6,7}$/,
+                    message:
+                      'Ingresá un DNI de 7 u 8 dígitos, sin puntos ni ceros iniciales',
+                  },
                 })}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={
-                  showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-                }
-                title={
-                  showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-                }
+                onClick={() => setShowDni(!showDni)}
+                aria-label={showDni ? 'Ocultar DNI' : 'Mostrar DNI'}
+                title={showDni ? 'Ocultar DNI' : 'Mostrar DNI'}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-med-text-muted hover:text-med-text-main"
               >
-                {showPassword ? (
+                {showDni ? (
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -198,23 +228,25 @@ function PatientLoginPage() {
                 )}
               </button>
             </div>
-            {errors.password && (
+            {errors.dni && (
               <p className="text-xs text-red-500 font-medium">
-                {errors.password.message}
+                {errors.dni.message}
               </p>
             )}
           </div>
 
-          <Button type="submit" className="w-full mt-1">
-            Ingresar Paciente
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Ingresando...' : 'Ingresar Paciente'}
           </Button>
 
-          <div className="bg-med-primary-50 border border-med-primary-200/60 rounded-lg p-2.5 text-center text-xs text-med-primary-900">
-            <span className="font-semibold">Credenciales de prueba:</span>
-            <br />
-            Email: <code>paciente@medportal.com</code> | Clave:{' '}
-            <code>paciente123</code>
-          </div>
+          <p className="text-center text-xs text-med-text-sub">
+            Ingresá con tu correo electrónico y DNI. En tu primer acceso, el
+            sistema te registrará automáticamente.
+          </p>
 
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center">

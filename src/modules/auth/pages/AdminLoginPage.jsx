@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../hook/useAuth';
-import { frontendErrorMessage } from '../helpers/backendError';
 
 function AdminLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -11,30 +10,47 @@ function AdminLoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm({ defaultValues: { username: '', password: '' } });
+    formState: { errors, isSubmitting },
+  } = useForm({ defaultValues: { email: '', password: '' } });
 
   const navigate = useNavigate();
   const { singinAdmin } = useAuth();
 
   const onValid = async (formData) => {
+    setErrorMessage('');
     try {
-      const { error } = await singinAdmin(formData.username, formData.password);
+      const { error } = await singinAdmin(formData.email, formData.password);
 
       if (error) {
         setErrorMessage(
-          error.frontendErrorMessage || 'Credenciales administrativas inválidas'
+          error.frontendErrorMessage || 'No se pudo iniciar sesión'
         );
 
         return;
       }
 
-      navigate('/admin/home');
+      navigate('/admin/home', { replace: true });
     } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
+      const status = error.response?.status;
+
+      if (status === 401) {
+        setErrorMessage('El correo o la contraseña son incorrectos.');
+      } else if (status === 429) {
+        setErrorMessage(
+          'Realizaste demasiados intentos. Esperá un minuto y volvé a intentar.'
+        );
+      } else if (status >= 500) {
+        setErrorMessage(
+          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
+        );
+      } else if (error.response) {
+        setErrorMessage(
+          error.response.data?.message || 'No se pudo iniciar sesión.'
+        );
       } else {
-        setErrorMessage('Error al conectar con el servicio administrativo');
+        setErrorMessage(
+          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
+        );
       }
     }
   };
@@ -76,6 +92,7 @@ function AdminLoginPage() {
           </div>
 
           <form
+            noValidate
             onSubmit={handleSubmit(onValid)}
             className="flex flex-col gap-4"
           >
@@ -104,18 +121,22 @@ function AdminLoginPage() {
                   type="email"
                   placeholder="admin@medportal.com"
                   className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                    errors.username
+                    errors.email
                       ? 'border-red-400 bg-red-50/20'
                       : 'border-med-border'
                   }`}
-                  {...register('username', {
+                  {...register('email', {
                     required: 'El correo electrónico es obligatorio',
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+                      message: 'Ingresá un correo electrónico válido',
+                    },
                   })}
                 />
               </div>
-              {errors.username && (
+              {errors.email && (
                 <p className="text-xs text-red-500 font-medium">
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -151,6 +172,10 @@ function AdminLoginPage() {
                   }`}
                   {...register('password', {
                     required: 'La contraseña es obligatoria',
+                    minLength: {
+                      value: 8,
+                      message: 'La contraseña debe tener al menos 8 caracteres',
+                    },
                   })}
                 />
                 <button
@@ -211,18 +236,16 @@ function AdminLoginPage() {
             {/* Botón de Submit */}
             <button
               type="submit"
-              className="mt-2 w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition"
+              disabled={isSubmitting}
+              className="mt-2 w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Iniciar Sesión</span>
+              <span>{isSubmitting ? 'Ingresando...' : 'Iniciar Sesión'}</span>
               <span className="text-sm">→</span>
             </button>
 
-            <div className="bg-med-primary-50 border border-med-primary-200/60 rounded-lg p-2.5 text-center text-xs text-med-primary-900">
-              <span className="font-semibold">Credenciales de prueba:</span>
-              <br />
-              Email: <code>admin@medportal.com</code> | Clave:{' '}
-              <code>admin123</code>
-            </div>
+            <p className="text-center text-xs text-med-text-sub">
+              Ingresá con las credenciales del administrador del sistema.
+            </p>
 
             {/* Error Message */}
             {errorMessage && (
