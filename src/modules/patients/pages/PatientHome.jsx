@@ -20,7 +20,12 @@ function PatientHome() {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showSlots, setShowSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const { saveAppointment, isSaving, errorMessage } = useCreateAppointment();
+  const [slotsVersion, setSlotsVersion] = useState(0);
+  const { saveAppointment, isSaving, errorMessage, clearError } =
+    useCreateAppointment(() => {
+      setSelectedSlot(null);
+      setSlotsVersion((version) => version + 1);
+    });
   const [notification, setNotification] = useState(null);
 
   function closeSnackbar() {
@@ -41,17 +46,26 @@ function PatientHome() {
     }
   }
 
+  function handleSlotChange(slot) {
+    clearError();
+    setSelectedSlot(slot);
+  }
+
   function handleDoctorChange(doctor) {
     setSelectedDoctor(doctor);
     setShowSlots(false);
-    setSelectedSlot(null);
+    handleSlotChange(null);
   }
 
   const showEmptySpecialties =
     !loadingSpecialties && !specialtiesError && specialties.length === 0;
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto">
+    <fieldset
+      disabled={isSaving}
+      aria-label="Reserva de turno"
+      className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-6"
+    >
       {/* 1. Card Superior: Selector de Especialidad y Doctor */}
       <Card className="p-6 sm:p-7">
         <div className="mb-5">
@@ -128,7 +142,7 @@ function PatientHome() {
           <Button
             className="mt-4 w-full sm:w-auto"
             onClick={() => {
-              setSelectedSlot(null);
+              handleSlotChange(null);
               setShowSlots(!showSlots);
             }}
           >
@@ -138,12 +152,13 @@ function PatientHome() {
       )}
       {selectedDoctor && showSlots && (
         <PatientAvailableSlots
-          key={selectedDoctor.id}
+          key={`${selectedDoctor.id}-${slotsVersion}`}
           doctorId={selectedDoctor.id}
           selectedSlotId={selectedSlot?.id}
-          onSlotChange={setSelectedSlot}
+          onSlotChange={handleSlotChange}
         />
       )}
+      {showSlots && !selectedSlot && <Alert message={errorMessage} />}
       {selectedDoctor && selectedSlot && (
         <PatientBookingForm
           key={selectedSlot.id}
@@ -155,7 +170,7 @@ function PatientHome() {
         />
       )}
       <Snackbar notification={notification} onClose={closeSnackbar} />
-    </div>
+    </fieldset>
   );
 }
 

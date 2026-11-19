@@ -3,7 +3,7 @@ import { createAppointment } from '../services/appointmentsService';
 import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 import { getMyProfile } from '../../patients/services/patientsService';
 
-function useCreateAppointment() {
+function useCreateAppointment(onSlotUnavailable) {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const saveAppointment = async (appointment) => {
@@ -19,6 +19,20 @@ function useCreateAppointment() {
 
       return createdAppointment;
     } catch (error) {
+      const response = error.response;
+      const slotUnavailable =
+        response?.status === 409 &&
+        response.data?.details?.some(
+          (detail) => detail.field?.toLowerCase() === 'availabilityslotid'
+        );
+
+      if (slotUnavailable) {
+        setErrorMessage('Ese horario ya no está disponible. Elegí otro.');
+        onSlotUnavailable?.();
+
+        return null;
+      }
+
       setErrorMessage(
         getApiErrorMessage(error, 'No se pudo reservar el turno.')
       );
@@ -29,7 +43,11 @@ function useCreateAppointment() {
     }
   };
 
-  return { saveAppointment, isSaving, errorMessage };
+  function clearError() {
+    setErrorMessage('');
+  }
+
+  return { saveAppointment, isSaving, errorMessage, clearError };
 }
 
 export default useCreateAppointment;
