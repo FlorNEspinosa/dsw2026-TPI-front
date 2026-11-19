@@ -27,3 +27,14 @@ export const createDoctor = async (doctor) => {
 export const deleteDoctor = async (id) => {
   await instance.delete(`api/doctors/${id}`);
 };
+
+export const getAvailableSlots = async (
+  doctorId,
+  { fromDate, toDate } = {}
+) => {
+  const response = await instance.get(`api/doctors/${doctorId}/slots`, {
+    params: { fromDate, toDate },
+  });
+
+  return response.data;
+};

@@ -1,25 +1,51 @@
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
+import Alert from '../../shared/components/Alert';
+import useMyAppointments from '../../appointments/hooks/useMyAppointments';
+import { useState } from 'react';
+import Snackbar from '../../shared/components/Snackbar';
+import { useNavigate } from 'react-router-dom';
 
 function AppointmentsPage() {
-  const sampleAppointments = [
-    {
-      id: 1,
-      doctor: 'Dra. María González',
-      specialty: 'Cardiología',
-      date: '2026-10-28',
-      time: '10:30 hs',
-      status: 'Confirmado',
-    },
-    {
-      id: 2,
-      doctor: 'Dr. Lucas Fernández',
-      specialty: 'Traumatología',
-      date: '2026-11-05',
-      time: '15:00 hs',
-      status: 'Pendiente',
-    },
-  ];
+  const navigate = useNavigate();
+  const {
+    appointments,
+    isLoading,
+    errorMessage,
+    cancelingId,
+    cancelMyAppointment,
+  } = useMyAppointments();
+  const [notification, setNotification] = useState(null);
+
+  function closeSnackbar() {
+    setNotification(null);
+  }
+
+  async function handleCancel(appt) {
+    const confirmed = window.confirm(
+      `¿Querés cancelar el turno con ${appt.doctor} del ${appt.date} a las ${appt.time}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setNotification(null);
+    const canceled = await cancelMyAppointment(appt.id);
+
+    if (canceled) {
+      setNotification({ message: 'Tu turno fue cancelado.' });
+    }
+  }
+
+  const appointmentCards = appointments.map((appointment) => ({
+    id: appointment.id,
+    doctor: appointment.doctor?.name ?? 'Médico sin informar',
+    specialty: appointment.doctor?.specialty?.name ?? 'Sin especialidad',
+    date: appointment.date,
+    time: `${appointment.startTime} hs`,
+    status: appointment.status === 'BOOKED' ? 'Confirmado' : appointment.status,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,13 +58,17 @@ function AppointmentsPage() {
             Consulta y gestiona las citas médicas programadas.
           </p>
         </div>
-        <Button onClick={() => alert('Función de nuevo turno próximamente')}>
-          + Solicitar Nuevo Turno
-        </Button>
+        <Button onClick={() => navigate('/')}>+ Solicitar Nuevo Turno</Button>
       </div>
 
+      {isLoading && <p role="status">Cargando tus turnos…</p>}
+      <Alert message={errorMessage} />
+      <Snackbar notification={notification} onClose={closeSnackbar} />
+      {!isLoading && !errorMessage && appointments.length === 0 && (
+        <p>Todavía no tenés turnos próximos.</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {sampleAppointments.map((appt) => (
+        {appointmentCards.map((appt) => (
           <Card
             key={appt.id}
             className="flex flex-col justify-between gap-4 p-6"
@@ -77,9 +107,10 @@ function AppointmentsPage() {
               <Button
                 variant="outline"
                 className="w-full text-xs"
-                onClick={() => alert(`Cancelando turno ${appt.id}`)}
+                disabled={cancelingId !== null}
+                onClick={() => handleCancel(appt)}
               >
-                Cancelar Turno
+                {cancelingId === appt.id ? 'Cancelando…' : 'Cancelar Turno'}
               </Button>
             </div>
           </Card>

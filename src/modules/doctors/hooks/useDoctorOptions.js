@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getDoctors } from '../services/doctorsService';
 import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 
-function useDoctorOptions() {
+function useDoctorOptions(specialtyId = '') {
   const [doctors, setDoctors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -24,6 +24,7 @@ function useDoctorOptions() {
           const response = await getDoctors({
             pageIndex,
             pageSize: 100,
+            specialtyId,
           });
 
           if (!active) {
@@ -63,7 +64,7 @@ function useDoctorOptions() {
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, specialtyId]);
 
   const reload = () => {
     setReloadKey((current) => current + 1);
