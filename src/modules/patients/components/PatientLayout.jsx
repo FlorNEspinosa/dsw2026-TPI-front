@@ -4,12 +4,27 @@ import useAuth from '../../auth/hook/useAuth';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const navigate = useNavigate();
   const { singout } = useAuth();
 
-  const handleLogout = () => {
-    singout();
-    navigate('/login');
+  const handleLogout = async () => {
+    setLogoutError('');
+    setIsSigningOut(true);
+
+    const { error } = await singout();
+
+    setIsSigningOut(false);
+
+    if (error) {
+      setLogoutError(error);
+
+      return;
+    }
+
+    navigate('/login', { replace: true });
   };
 
   const getNavLinkClass = ({ isActive }) =>
@@ -93,10 +108,12 @@ function PatientLayout() {
             </div>
 
             <button
+              type="button"
               onClick={handleLogout}
+              disabled={isSigningOut}
               className="hidden sm:inline-flex text-xs font-semibold text-med-text-sub hover:text-red-600 px-2.5 py-1.5 rounded-lg border border-med-border hover:bg-red-50/40 transition"
             >
-              Salir
+              {isSigningOut ? 'Cerrando...' : 'Salir'}
             </button>
 
             {/* Botón hamburguesa móvil */}
@@ -157,10 +174,12 @@ function PatientLayout() {
                 Paciente: Johnathan Doe
               </span>
               <button
+                type="button"
                 onClick={handleLogout}
+                disabled={isSigningOut}
                 className="text-xs font-bold text-red-600"
               >
-                Cerrar sesión
+                {isSigningOut ? 'Cerrando...' : 'Cerrar sesión'}
               </button>
             </div>
           </div>
@@ -169,6 +188,14 @@ function PatientLayout() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        {logoutError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          >
+            {logoutError}
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

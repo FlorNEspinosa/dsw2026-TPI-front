@@ -19,17 +19,19 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-  (config) => {
-    return config;
-  },
+  (response) => response,
   (error) => {
-    if (error.status === 401) {
-      if (window.location.pathname.includes('/admin/')) {
-        localStorage.clear();
-        window.location.href = '/login';
-      } else {
-        localStorage.removeItem('token');
-      }
+    const status = error.response?.status;
+    const pathname = window.location.pathname;
+    const isLoginRequest = error.config?.url?.endsWith('/login');
+
+    if (status === 401 && !isLoginRequest) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+
+      window.location.href = pathname.startsWith('/admin')
+        ? '/admin/login'
+        : '/login';
     }
 
     return Promise.reject(error);
