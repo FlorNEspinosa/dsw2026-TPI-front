@@ -21,9 +21,11 @@ import OverviewPage from './modules/dashboard/pages/OverviewPage';
 
 // Domain Modules (Screaming Architecture)
 import DoctorsPage from './modules/doctors/pages/DoctorsPage';
+import CreateDoctorPage from './modules/doctors/pages/CreateDoctorPage';
 import SpecialtiesPage from './modules/specialties/pages/SpecialtiesPage';
 import CreateSpecialtyPage from './modules/specialties/pages/CreateSpecialtyPage';
 import AppointmentsSearchPage from './modules/appointments/pages/AppointmentsSearchPage';
+import AvailabilitiesPage from './modules/availabilities/pages/AvailabilitiesPage';
 
 const routes = [
   // Rutas públicas
@@ -96,6 +98,14 @@ const routes = [
       {
         path: 'doctors',
         element: <DoctorsPage />,
+      },
+      {
+        path: 'doctors/new',
+        element: <CreateDoctorPage />,
+      },
+      {
+        path: 'availabilities',
+        element: <AvailabilitiesPage />,
       },
     ],
   },
