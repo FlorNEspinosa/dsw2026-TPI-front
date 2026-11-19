@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
@@ -7,15 +7,21 @@ import SpecialtiesFilters from '../components/SpecialtiesFilters';
 import SpecialtiesTable from '../components/SpecialtiesTable';
 import useSpecialties from '../hooks/useSpecialties';
 import useDeleteSpecialty from '../hooks/useDeleteSpecialty';
+import Alert from '../../shared/components/Alert';
+import Snackbar from '../../shared/components/Snackbar';
 
 function SpecialtiesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState({ pageIndex: 1, name: '' });
 
-  const [successMessage, setSuccessMessage] = useState('');
+  const [notification, setNotification] = useState(() => {
+    return location.state?.notification ?? null;
+  });
+
   const pageSize = 10;
 
-  const { specialties, total, isLoading, errorMessage, reload } =
+  const { specialties, total, isLoading, errorMessage, reload, loadedQuery } =
     useSpecialties({
       pageIndex: query.pageIndex,
       pageSize,
@@ -30,10 +36,62 @@ function SpecialtiesPage() {
   } = useDeleteSpecialty();
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const isBusy = isLoading || deletingId !== null;
+  const hasCurrentResult =
+    loadedQuery?.pageIndex === query.pageIndex &&
+    loadedQuery?.pageSize === pageSize &&
+    loadedQuery?.name === query.name;
+
+  const needsPageCorrection =
+    !isLoading &&
+    !errorMessage &&
+    hasCurrentResult &&
+    query.pageIndex > totalPages;
+
+  const showLoading =
+    !errorMessage && (isLoading || !hasCurrentResult || needsPageCorrection);
+
+  const isBusy = showLoading || deletingId !== null;
+
+  const handleCloseSnackbar = useCallback(() => {
+    setNotification(null);
+  }, []);
+
+  useEffect(() => {
+    if (!location.state?.notification) {
+      return;
+    }
+
+    navigate(`${location.pathname}${location.search}${location.hash}`, {
+      replace: true,
+      state: null,
+    });
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+    location.state,
+    navigate,
+  ]);
+
+  useEffect(() => {
+    if (!needsPageCorrection) {
+      return;
+    }
+
+    setQuery((current) => {
+      if (current.pageIndex <= totalPages) {
+        return current;
+      }
+
+      return {
+        ...current,
+        pageIndex: totalPages,
+      };
+    });
+  }, [needsPageCorrection, totalPages]);
 
   const handleSearch = (name) => {
-    setSuccessMessage('');
+    setNotification(null);
     clearError();
 
     if (query.pageIndex === 1 && query.name === name) {
@@ -53,7 +111,7 @@ function SpecialtiesPage() {
       return;
     }
 
-    setSuccessMessage('');
+    setNotification(null);
     clearError();
 
     setQuery((current) => ({
@@ -75,7 +133,7 @@ function SpecialtiesPage() {
       return;
     }
 
-    setSuccessMessage('');
+    setNotification(null);
 
     const removed = await removeSpecialty(specialty.id);
 
@@ -83,16 +141,11 @@ function SpecialtiesPage() {
       return;
     }
 
-    setSuccessMessage('La especialidad se eliminó correctamente.');
-
-    if (specialties.length === 1 && query.pageIndex > 1) {
-      setQuery((current) => ({
-        ...current,
-        pageIndex: current.pageIndex - 1,
-      }));
-    } else {
-      reload();
-    }
+    setNotification({
+      id: crypto.randomUUID(),
+      message: 'La especialidad se eliminó correctamente.',
+    });
+    reload();
   };
 
   return (
@@ -118,23 +171,9 @@ function SpecialtiesPage() {
         </Button>
       </div>
 
-      {successMessage && (
-        <div
-          role="status"
-          className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800"
-        >
-          {successMessage}
-        </div>
-      )}
+      <Snackbar notification={notification} onClose={handleCloseSnackbar} />
 
-      {deleteError && (
-        <div
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-        >
-          {deleteError}
-        </div>
-      )}
+      <Alert message={deleteError} />
 
       <SpecialtiesFilters onSearch={handleSearch} isLoading={isBusy} />
 
@@ -145,15 +184,13 @@ function SpecialtiesPage() {
           </h2>
         </div>
 
-        {isLoading ? (
+        {showLoading ? (
           <p role="status" className="py-6 text-center text-med-text-sub">
             Cargando especialidades...
           </p>
         ) : errorMessage ? (
           <div className="flex flex-col items-start gap-3 py-4">
-            <p role="alert" className="text-sm text-red-600">
-              {errorMessage}
-            </p>
+            <Alert message={errorMessage} />
 
             <Button variant="secondary" onClick={reload}>
               Reintentar

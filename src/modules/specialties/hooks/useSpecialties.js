@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSpecialties } from '../services/specialtiesService';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 
 function useSpecialties({ pageIndex = 1, pageSize = 10, name = '' } = {}) {
   const [specialties, setSpecialties] = useState([]);
@@ -7,6 +8,7 @@ function useSpecialties({ pageIndex = 1, pageSize = 10, name = '' } = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
+  const [loadedQuery, setLoadedQuery] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -14,6 +16,7 @@ function useSpecialties({ pageIndex = 1, pageSize = 10, name = '' } = {}) {
     const loadSpecialties = async () => {
       setIsLoading(true);
       setErrorMessage('');
+      setLoadedQuery(null);
 
       try {
         const response = await getSpecialties({ pageIndex, pageSize, name });
@@ -21,14 +24,22 @@ function useSpecialties({ pageIndex = 1, pageSize = 10, name = '' } = {}) {
         if (active) {
           setSpecialties(response.data);
           setTotal(response.total);
+          setLoadedQuery({
+            pageIndex,
+            pageSize,
+            name,
+          });
         }
       } catch (error) {
         if (active) {
           setSpecialties([]);
           setTotal(0);
+          setLoadedQuery(null);
           setErrorMessage(
-            error.response?.data?.message ||
+            getApiErrorMessage(
+              error,
               'No se pudieron cargar las especialidades.'
+            )
           );
         }
       } finally {
@@ -49,7 +60,7 @@ function useSpecialties({ pageIndex = 1, pageSize = 10, name = '' } = {}) {
     setReloadKey((current) => current + 1);
   };
 
-  return { specialties, total, isLoading, errorMessage, reload };
+  return { specialties, total, isLoading, errorMessage, reload, loadedQuery };
 }
 
 export default useSpecialties;

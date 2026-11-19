@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
+import Alert from '../../shared/components/Alert';
 import SpecialtyForm from '../components/SpecialtyForm';
 import useCreateSpecialty from '../hooks/useCreateSpecialty';
 
@@ -12,7 +13,15 @@ function CreateSpecialtyPage() {
     const createdSpecialty = await saveSpecialty(specialty);
 
     if (createdSpecialty) {
-      navigate('/admin/specialties', { replace: true });
+      navigate('/admin/specialties', {
+        replace: true,
+        state: {
+          notification: {
+            id: crypto.randomUUID(),
+            message: 'La especialidad se creó correctamente.',
+          },
+        },
+      });
     }
   };
 
@@ -33,14 +42,7 @@ function CreateSpecialtyPage() {
       </div>
 
       <Card>
-        {errorMessage && (
-          <div
-            role="alert"
-            className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-          >
-            {errorMessage}
-          </div>
-        )}
+        <Alert message={errorMessage} className="mb-5" />
 
         <SpecialtyForm
           onSave={handleSave}

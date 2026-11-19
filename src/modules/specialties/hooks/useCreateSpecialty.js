@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createSpecialty } from '../services/specialtiesService';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 
 function useCreateSpecialty() {
   const [isSaving, setIsSaving] = useState(false);
@@ -14,21 +15,9 @@ function useCreateSpecialty() {
 
       return createdSpecialty;
     } catch (error) {
-      const response = error.response;
-
-      if (!response) {
-        setErrorMessage(
-          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
-        );
-      } else if (response.status >= 500) {
-        setErrorMessage(
-          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
-        );
-      } else {
-        setErrorMessage(
-          response.data?.message || 'No se pudo crear la especialidad.'
-        );
-      }
+      setErrorMessage(
+        getApiErrorMessage(error, 'No se pudo crear la especialidad.')
+      );
 
       return null;
     } finally {

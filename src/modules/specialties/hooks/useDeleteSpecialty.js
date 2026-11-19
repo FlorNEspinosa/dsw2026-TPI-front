@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { deleteSpecialty } from '../services/specialtiesService';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 
 function useDeleteSpecialty() {
   const [deletingId, setDeletingId] = useState(null);
@@ -18,21 +19,9 @@ function useDeleteSpecialty() {
 
       return true;
     } catch (error) {
-      const response = error.response;
-
-      if (!response) {
-        setErrorMessage(
-          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
-        );
-      } else if (response.status >= 500) {
-        setErrorMessage(
-          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
-        );
-      } else {
-        setErrorMessage(
-          response.data?.message || 'No se pudo eliminar la especialidad.'
-        );
-      }
+      setErrorMessage(
+        getApiErrorMessage(error, 'No se pudo eliminar la especialidad.')
+      );
 
       return false;
     } finally {
