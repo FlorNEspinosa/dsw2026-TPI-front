@@ -31,7 +31,7 @@ function AvailabilityForm({
 }) {
   const [days, setDays] = useState(() => {
     if (initialAvailabilities.length === 0) {
-      return [createEmptyDay()];
+      return [];
     }
 
     return initialAvailabilities.map((availability) => ({
@@ -54,9 +54,9 @@ function AvailabilityForm({
     );
   };
 
-  const addDay = () => {
+  const addDay = (day) => {
     setErrorMessage('');
-    const newDay = createEmptyDay();
+    const newDay = { ...createEmptyDay(), day };
 
     setDays((current) => [...current, newDay]);
   };
@@ -65,6 +65,17 @@ function AvailabilityForm({
     setErrorMessage('');
 
     setDays((current) => current.filter((entry) => entry.rowKey !== rowKey));
+  };
+
+  const toggleDay = (day, isActive) => {
+    if (isActive) {
+      addDay(day);
+
+      return;
+    }
+
+    setErrorMessage('');
+    setDays((current) => current.filter((entry) => entry.day !== day));
   };
 
   const handleSubmit = async (event) => {
@@ -168,121 +179,168 @@ function AvailabilityForm({
       <fieldset disabled={isSaving} className="flex flex-col gap-5">
         <legend className="sr-only">Franjas de disponibilidad</legend>
 
-        <p className="text-sm text-med-text-sub">
-          Configurá los días y horarios del mes actual. Podés agregar más de una
-          franja por día, siempre que no se superpongan.
-        </p>
-
         <Alert message={errorMessage} />
 
-        {days.length === 0 && (
-          <Alert
-            variant="info"
-            message="No hay franjas cargadas en el formulario."
-          />
-        )}
+        <table className="w-full text-left text-sm">
+          <caption className="sr-only">
+            Días y horarios de atención del mes actual
+          </caption>
 
-        {days.map((entry, index) => (
-          <div
-            key={entry.rowKey}
-            className="grid grid-cols-[minmax(180px,1fr)_160px_160px_auto] items-start gap-4 rounded-lg border border-med-border p-4"
-          >
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor={`day-${entry.rowKey}`}
-                className="text-xs font-semibold text-med-text-main"
-              >
-                Día · Franja {index + 1}
-              </label>
+          <thead className="bg-med-primary-50 text-xs uppercase text-med-text-sub">
+            <tr>
+              <th scope="col" className="p-3">
+                Día
+              </th>
+              <th scope="col" className="p-3">
+                Estado
+              </th>
+              <th scope="col" className="p-3">
+                Entrada
+              </th>
+              <th scope="col" className="p-3">
+                Salida
+              </th>
+            </tr>
+          </thead>
 
-              <select
-                id={`day-${entry.rowKey}`}
-                value={entry.day}
-                onChange={(event) =>
-                  updateDay(entry.rowKey, 'day', event.target.value)
-                }
-                className="w-full rounded-lg border border-med-border bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-med-primary-600"
-              >
-                {WEEK_DAYS.map((day) => (
-                  <option key={day.value} value={day.value}>
-                    {day.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <tbody className="divide-y divide-med-border">
+            {WEEK_DAYS.map((weekDay) => {
+              const entries = days.filter(
+                (entry) => entry.day === weekDay.value
+              );
+              const isActive = entries.length > 0;
 
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor={`start-${entry.rowKey}`}
-                className="text-xs font-semibold text-med-text-main"
-              >
-                Hora de inicio
-              </label>
+              return (
+                <tr key={weekDay.value}>
+                  <th scope="row" className="p-3 align-top font-medium">
+                    <div className="flex flex-col items-start gap-2">
+                      <span>{weekDay.label}</span>
 
-              <Input
-                id={`start-${entry.rowKey}`}
-                type="time"
-                step={60}
-                value={entry.startTime}
-                onChange={(event) =>
-                  updateDay(entry.rowKey, 'startTime', event.target.value)
-                }
-              />
-            </div>
+                      {isActive && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => addDay(weekDay.value)}
+                          aria-label={`Agregar franja para ${weekDay.label}`}
+                          className="text-xs"
+                        >
+                          + Franja
+                        </Button>
+                      )}
+                    </div>
+                  </th>
 
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor={`end-${entry.rowKey}`}
-                className="text-xs font-semibold text-med-text-main"
-              >
-                Hora de fin
-              </label>
+                  <td className="p-3 align-top">
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={isActive}
+                      aria-label={`Atención del ${weekDay.label}`}
+                      onClick={() => toggleDay(weekDay.value, !isActive)}
+                      className="inline-flex items-center gap-2 py-2"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`flex h-5 w-9 items-center rounded-full px-0.5 ${isActive ? 'bg-med-primary-900' : 'bg-gray-200'}`}
+                      >
+                        <span
+                          className={`h-4 w-4 rounded-full bg-white transition-transform ${isActive ? 'translate-x-4' : 'translate-x-0'}`}
+                        />
+                      </span>
 
-              <Input
-                id={`end-${entry.rowKey}`}
-                type="time"
-                step={60}
-                value={entry.endTime}
-                onChange={(event) =>
-                  updateDay(entry.rowKey, 'endTime', event.target.value)
-                }
-              />
-            </div>
+                      <span className="text-xs">
+                        {isActive ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </button>
+                  </td>
 
-            <Button
-              variant="danger"
-              onClick={() => removeDay(entry.rowKey)}
-              aria-label={`Quitar franja ${index + 1}`}
-              className="mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Quitar
-            </Button>
-          </div>
-        ))}
+                  <td className="p-3 align-top">
+                    <div className="flex flex-col gap-3">
+                      {isActive ? (
+                        entries.map((entry, index) => (
+                          <Input
+                            key={entry.rowKey}
+                            type="time"
+                            step={60}
+                            value={entry.startTime}
+                            aria-label={`${weekDay.label}, entrada, franja ${index + 1}`}
+                            onChange={(event) =>
+                              updateDay(
+                                entry.rowKey,
+                                'startTime',
+                                event.target.value
+                              )
+                            }
+                          />
+                        ))
+                      ) : (
+                        <Input
+                          type="time"
+                          value=""
+                          disabled
+                          readOnly
+                          aria-label={`Entrada del ${weekDay.label}`}
+                        />
+                      )}
+                    </div>
+                  </td>
 
-        <div>
-          <Button
-            variant="secondary"
-            onClick={addDay}
-            className="disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            + Agregar franja
-          </Button>
-        </div>
+                  <td className="p-3 align-top">
+                    <div className="flex flex-col gap-3">
+                      {isActive ? (
+                        entries.map((entry, index) => (
+                          <div
+                            key={entry.rowKey}
+                            className="flex items-center gap-2"
+                          >
+                            <Input
+                              type="time"
+                              step={60}
+                              value={entry.endTime}
+                              aria-label={`${weekDay.label}, salida, franja ${index + 1}`}
+                              onChange={(event) =>
+                                updateDay(
+                                  entry.rowKey,
+                                  'endTime',
+                                  event.target.value
+                                )
+                              }
+                            />
+
+                            {entries.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                onClick={() => removeDay(entry.rowKey)}
+                                aria-label={`Quitar franja ${index + 1} del ${weekDay.label}`}
+                                className="text-xs"
+                              >
+                                Quitar
+                              </Button>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <Input
+                          type="time"
+                          value=""
+                          disabled
+                          readOnly
+                          aria-label={`Salida del ${weekDay.label}`}
+                        />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
         <div className="flex justify-end gap-3 border-t border-med-border pt-4">
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            className="disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
 
-          <Button
-            type="submit"
-            className="disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button type="submit">
             {isSaving ? 'Guardando...' : 'Guardar disponibilidad'}
           </Button>
         </div>

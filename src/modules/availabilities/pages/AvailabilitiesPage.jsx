@@ -99,60 +99,90 @@ function AvailabilitiesPage() {
         </Button>
       </div>
 
-      <Card>
-        {isLoadingDoctors ? (
-          <p role="status" className="py-6 text-center text-med-text-sub">
-            Cargando médicos...
-          </p>
-        ) : doctorsError ? (
-          <div className="flex flex-col items-start gap-3">
-            <Alert message={doctorsError} />
-
-            <Button variant="secondary" onClick={reloadDoctors}>
-              Reintentar
-            </Button>
-          </div>
-        ) : doctors.length === 0 ? (
-          <Alert
-            variant="info"
-            message="Primero registrá un médico para poder configurar su disponibilidad."
-          />
-        ) : (
-          <div className="flex max-w-2xl flex-col gap-2">
-            <label
-              htmlFor="availability-doctor"
-              className="text-xs font-semibold text-med-text-main"
-            >
-              Médico
-            </label>
-
-            <select
-              id="availability-doctor"
-              value={doctorId}
-              onChange={handleDoctorChange}
-              disabled={isSaving}
-              className="w-full rounded-lg border border-med-border bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-med-primary-600 disabled:opacity-50"
-            >
-              <option value="">Seleccioná un médico</option>
-
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.name} · {doctor.specialty?.name || 'Sin especialidad'}
-                  {doctor.isActive ? '' : ' (inactivo)'}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </Card>
-
-      {!isLoadingDoctors && !doctorsError && selectedDoctor && (
+      <div className="grid grid-cols-[260px_minmax(0,1fr)] items-start gap-6">
         <Card>
-          <h2 className="mb-5 text-lg font-bold text-med-primary-900">
-            Horarios de {selectedDoctor.name}
+          <h2 className="mb-4 font-semibold text-med-primary-900">
+            Seleccionar Profesional
           </h2>
 
-          {isLoadingAvailabilities ? (
+          {isLoadingDoctors ? (
+            <p role="status" className="text-med-text-sub">
+              Cargando médicos...
+            </p>
+          ) : doctorsError ? (
+            <div className="flex flex-col items-start gap-3">
+              <Alert message={doctorsError} />
+
+              <Button variant="secondary" onClick={reloadDoctors}>
+                Reintentar
+              </Button>
+            </div>
+          ) : doctors.length === 0 ? (
+            <Alert
+              variant="info"
+              message="Primero registrá un médico para configurar su disponibilidad."
+            />
+          ) : (
+            <div className="flex flex-col gap-4">
+              <label htmlFor="availability-doctor" className="sr-only">
+                Médico
+              </label>
+
+              <select
+                id="availability-doctor"
+                value={doctorId}
+                onChange={handleDoctorChange}
+                disabled={isSaving}
+                className="w-full rounded-lg border border-med-border bg-white px-3 py-2.5 text-sm disabled:opacity-50"
+              >
+                <option value="">Seleccioná un médico</option>
+
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                    {doctor.isActive ? '' : ' (inactivo)'}
+                  </option>
+                ))}
+              </select>
+
+              {selectedDoctor && (
+                <div className="rounded-lg bg-med-primary-50 p-4">
+                  <p className="font-semibold">{selectedDoctor.name}</p>
+
+                  <p className="mt-1 text-sm text-med-text-sub">
+                    {selectedDoctor.specialty?.name || 'Sin especialidad'}
+                  </p>
+
+                  <p className="mt-1 text-xs text-med-text-sub">
+                    Matrícula: {selectedDoctor.licenseNumber || 'Sin informar'}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-xs text-med-text-sub">
+                La configuración corresponde al mes actual.
+              </p>
+            </div>
+          )}
+        </Card>
+
+        <Card className="min-w-0">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="font-semibold text-med-primary-900">
+              Configuración de Horarios
+            </h2>
+
+            <span className="text-xs text-med-text-sub">
+              Turnos de 30 minutos
+            </span>
+          </div>
+
+          {!selectedDoctor || isLoadingDoctors || doctorsError ? (
+            <Alert
+              variant="info"
+              message="Seleccioná un profesional para configurar sus horarios."
+            />
+          ) : isLoadingAvailabilities ? (
             <p role="status" className="py-6 text-center text-med-text-sub">
               Cargando disponibilidad...
             </p>
@@ -179,7 +209,7 @@ function AvailabilitiesPage() {
             </>
           )}
         </Card>
-      )}
+      </div>
     </div>
   );
 }
