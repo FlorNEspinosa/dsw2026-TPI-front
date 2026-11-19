@@ -15,3 +15,13 @@ export const createAppointment = async ({
 
   return response.data;
 };
+
+export const getMyAppointments = async () => {
+  const response = await instance.get('api/appointments/patient');
+
+  return response.data;
+};
+
+export const cancelAppointment = async (appointmentId) => {
+  await instance.delete(`api/appointments/${appointmentId}`);
+};
