@@ -14,7 +14,6 @@ function OverviewPage() {
   const { summary, isLoading, errorMessage } = useDashboardSummary();
 
   const [query, setQuery] = useState({ pageIndex: 1, name: '' });
-  const [searchName, setSearchName] = useState('');
   const pageSize = 3;
 
   const {
@@ -46,26 +45,6 @@ function OverviewPage() {
   const showDoctorsLoading =
     !doctorsError &&
     (loadingDoctors || !hasCurrentResult || needsPageCorrection);
-
-  useEffect(() => {
-    const name = searchName.trim();
-
-    if (name.length > 0 && name.length < 3) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      setQuery((current) => {
-        if (current.name === name) {
-          return current;
-        }
-
-        return { pageIndex: 1, name };
-      });
-    }, 400);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchName]);
 
   useEffect(() => {
     if (!needsPageCorrection) {
@@ -243,7 +222,6 @@ function OverviewPage() {
             isLoading={showDoctorsLoading}
             placeholder="Buscar por nombre..."
             inputId="dashboard-doctor-name"
-            onNameChange={setSearchName}
             compact
           />
         </div>
