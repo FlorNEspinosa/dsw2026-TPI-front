@@ -5,8 +5,9 @@ function SpecialtiesFilters({ onSearch, isLoading = false }) {
     <NameFilter
       onSearch={onSearch}
       isLoading={isLoading}
-      placeholder="Ej.: Cardiología"
+      placeholder="Buscar especialidad..."
       inputId="specialty-name-filter"
+      compact
     />
   );
 }

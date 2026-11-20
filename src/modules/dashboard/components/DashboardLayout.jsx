@@ -10,20 +10,19 @@ function DashboardLayout() {
   const navigate = useNavigate();
   const { singout } = useAuth();
 
-  const handleLogout = async () => {
+  const handleLogout = async() => {
     setLogoutError('');
     setIsSigningOut(true);
 
     const { error } = await singout();
-
+    
     setIsSigningOut(false);
 
     if (error) {
-      setLogoutError(error);
+    setLogoutError(error);
 
-      return;
-    }
-
+    return;
+  }
     navigate('/admin/login', { replace: true });
   };
 
@@ -237,13 +236,13 @@ function DashboardLayout() {
         {/* Contenido de Rutas Hijas */}
         <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
           {logoutError && (
-            <div
-              role="alert"
-              className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-            >
-              {logoutError}
-            </div>
-          )}
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          >
+            {logoutError}
+         </div>
+)}
           <Outlet />
         </main>
       </div>

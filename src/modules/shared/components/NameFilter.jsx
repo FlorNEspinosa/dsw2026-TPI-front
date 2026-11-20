@@ -37,7 +37,7 @@ function NameFilter({
       onSubmit={handleSubmit(onValid)}
       className={
         compact
-          ? 'w-full sm:w-72'
+          ? 'w-48 shrink-0'
           : 'flex flex-col sm:flex-row sm:items-start gap-3'
       }
     >
