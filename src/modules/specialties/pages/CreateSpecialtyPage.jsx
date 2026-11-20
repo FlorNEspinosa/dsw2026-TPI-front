@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Alert from '../../shared/components/Alert';
 import SpecialtyForm from '../components/SpecialtyForm';
@@ -31,6 +31,26 @@ function CreateSpecialtyPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <nav
+        aria-label="Ruta de navegación"
+        className="flex items-center gap-2 text-xs text-med-text-sub"
+      >
+        <Link
+          to="/admin/specialties"
+          className="hover:text-med-primary-900 hover:underline"
+        >
+          Especialidades
+        </Link>
+
+        <span aria-hidden="true">›</span>
+
+        <span
+          aria-current="page"
+          className="font-semibold text-med-primary-900"
+        >
+          Agregar Nueva Especialidad
+        </span>
+      </nav>
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
           Registrar Nueva Especialidad

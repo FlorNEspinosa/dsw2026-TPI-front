@@ -110,7 +110,7 @@ function SpecialtyForm({ onSave, onCancel, isSaving = false }) {
 
           <select
             id="specialty-active"
-            className="w-full text-sm"
+            className="w-full rounded-lg border border-med-border bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-med-primary-600"
             {...register('isActive')}
           >
             <option value="true">Activa</option>

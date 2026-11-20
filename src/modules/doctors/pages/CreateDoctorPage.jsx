@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import Alert from '../../shared/components/Alert';
@@ -39,18 +39,40 @@ function CreateDoctorPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-med-text-main">
-          Registrar Nuevo Médico
-        </h1>
+    <div className="flex w-full max-w-4xl flex-col gap-5">
+      <nav
+        aria-label="Ruta de navegación"
+        className="flex items-center gap-2 text-xs text-med-text-sub"
+      >
+        <Link
+          to="/admin/doctors"
+          className="hover:text-med-primary-900 hover:underline"
+        >
+          Doctores
+        </Link>
 
-        <p className="mt-1 text-sm text-med-text-sub">
-          Completá los datos y seleccioná la especialidad del médico.
-        </p>
-      </div>
+        <span aria-hidden="true">›</span>
 
-      <Card>
+        <span
+          aria-current="page"
+          className="font-semibold text-med-primary-900"
+        >
+          Agregar Nuevo Doctor
+        </span>
+      </nav>
+
+      <Card className="overflow-hidden">
+        <div className="-mx-5 -mt-5 mb-6 border-b border-med-border bg-med-primary-50/30 px-5 py-5">
+          <h1 className="text-lg font-semibold text-med-primary-900">
+            Registrar Nuevo Doctor
+          </h1>
+
+          <p className="mt-1 text-xs text-med-text-sub">
+            Complete los campos obligatorios para registrar al profesional en el
+            sistema.
+          </p>
+        </div>
+
         {isLoading ? (
           <p role="status" className="py-6 text-center text-med-text-sub">
             Cargando especialidades...

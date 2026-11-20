@@ -77,7 +77,7 @@ function PatientHome() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+        <div className="grid grid-cols-1  items-end gap-4 md:grid-cols-12">
           {/* Especialidad */}
           <div className="md:col-span-5 flex flex-col gap-1.5">
             <label
@@ -124,30 +124,55 @@ function PatientHome() {
               onDoctorChange={handleDoctorChange}
             />
           )}
+          <div className="md:col-span-3 md:col-start-10">
+            <Button
+              disabled={!selectedDoctor || isSaving}
+              className="flex w-full items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                handleSlotChange(null);
+                setSlotsVersion((version) => version + 1);
+                setShowSlots(true);
+              }}
+            >
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="10" cy="10" r="6" />
+                <path strokeLinecap="round" d="m15 15 5 5" />
+              </svg>
+              Buscar Disponibilidad
+            </Button>
+          </div>
         </div>
       </Card>
       {selectedDoctor && (
-        <Card className="p-5 sm:p-6">
-          <h2 className="text-base font-bold text-med-primary-900 sm:text-lg">
-            {selectedDoctor.name}
-          </h2>
-          <p className="text-sm text-med-text-sub">
-            {selectedDoctor.specialty?.name}
-          </p>
-          {selectedDoctor.licenseNumber && (
+        <Card className="flex items-center gap-4 p-5 sm:p-6">
+          <div className="relative shrink-0" aria-hidden="true">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-med-primary-200 bg-med-primary-100 text-3xl sm:h-16 sm:w-16">
+              👨‍⚕️
+            </div>
+
+            <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+          </div>
+
+          <div className="min-w-0 flex-1 break-words">
+            <h2 className="text-base font-bold text-med-primary-900 sm:text-lg">
+              {selectedDoctor.name}
+            </h2>
             <p className="text-sm text-med-text-sub">
-              Matrícula: {selectedDoctor.licenseNumber}
+              {selectedDoctor.specialty?.name}
             </p>
-          )}
-          <Button
-            className="mt-4 w-full sm:w-auto"
-            onClick={() => {
-              handleSlotChange(null);
-              setShowSlots(!showSlots);
-            }}
-          >
-            {showSlots ? 'Ocultar disponibilidad' : 'Buscar disponibilidad'}
-          </Button>
+            {selectedDoctor.licenseNumber && (
+              <p className="text-sm text-med-text-sub">
+                Matrícula: {selectedDoctor.licenseNumber}
+              </p>
+            )}
+          </div>
         </Card>
       )}
       {selectedDoctor && showSlots && (
