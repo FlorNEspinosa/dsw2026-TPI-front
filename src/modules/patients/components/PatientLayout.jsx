@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import Alert from '../../shared/components/Alert';
+import Button from '../../shared/components/Button';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -108,14 +109,15 @@ function PatientLayout() {
               </span>
             </div>
 
-            <button
+            <Button
+              variant="dangerGhost"
               type="button"
               onClick={handleLogout}
               disabled={isSigningOut}
-              className="hidden sm:inline-flex text-xs font-semibold text-med-text-sub hover:text-red-600 px-2.5 py-1.5 rounded-lg border border-med-border hover:bg-red-50/40 transition"
+              className="hidden sm:inline-flex text-xs font-semibold px-2.5 py-1.5 border border-med-border"
             >
               {isSigningOut ? 'Cerrando...' : 'Salir'}
-            </button>
+            </Button>
 
             {/* Botón hamburguesa móvil */}
             <button
@@ -174,14 +176,15 @@ function PatientLayout() {
               <span className="text-xs font-medium text-med-text-sub">
                 Paciente: Johnathan Doe
               </span>
-              <button
+              <Button
+                variant="dangerGhost"
                 type="button"
                 onClick={handleLogout}
                 disabled={isSigningOut}
-                className="text-xs font-bold text-red-600"
+                className="text-xs font-bold"
               >
                 {isSigningOut ? 'Cerrando...' : 'Cerrar sesión'}
-              </button>
+              </Button>
             </div>
           </div>
         )}
