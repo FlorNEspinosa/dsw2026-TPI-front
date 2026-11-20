@@ -21,19 +21,7 @@ function PatientLoginPage() {
   const onValid = async (formData) => {
     setErrorMessage('');
     try {
-      const { error } = await singinPatient(
-        formData.email.trim(),
-        Number(formData.dni)
-      );
-
-      if (error) {
-        setErrorMessage(
-          error.frontendErrorMessage || 'No se pudo iniciar sesión'
-        );
-
-        return;
-      }
-
+      await singinPatient(formData.email.trim(), Number(formData.dni));
       navigate('/', { replace: true });
     } catch (error) {
       const status = error.response?.status;

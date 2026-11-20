@@ -22,16 +22,7 @@ function AdminLoginPage() {
   const onValid = async (formData) => {
     setErrorMessage('');
     try {
-      const { error } = await singinAdmin(formData.email, formData.password);
-
-      if (error) {
-        setErrorMessage(
-          error.frontendErrorMessage || 'No se pudo iniciar sesión'
-        );
-
-        return;
-      }
-
+      await singinAdmin(formData.email, formData.password);
       navigate('/admin/home', { replace: true });
     } catch (error) {
       const status = error.response?.status;
