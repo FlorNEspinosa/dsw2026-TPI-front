@@ -2,7 +2,7 @@ import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import Alert from '../../shared/components/Alert';
 import useMyAppointments from '../../appointments/hooks/useMyAppointments';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Snackbar from '../../shared/components/Snackbar';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,9 +17,9 @@ function AppointmentsPage() {
   } = useMyAppointments();
   const [notification, setNotification] = useState(null);
 
-  function closeSnackbar() {
+  const closeSnackbar = useCallback(() => {
     setNotification(null);
-  }
+  }, []);
 
   async function handleCancel(appt) {
     const confirmed = window.confirm(

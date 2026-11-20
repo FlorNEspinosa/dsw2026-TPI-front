@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Card from '../../shared/components/Card';
 import PatientDoctorSelect from '../components/PatientDoctorSelect';
 import Alert from '../../shared/components/Alert';
@@ -28,9 +28,9 @@ function PatientHome() {
     });
   const [notification, setNotification] = useState(null);
 
-  function closeSnackbar() {
+  const closeSnackbar = useCallback(() => {
     setNotification(null);
-  }
+  }, []);
 
   async function handleConfirm({ reason }) {
     const appointment = await saveAppointment({

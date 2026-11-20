@@ -73,7 +73,6 @@ function AuthProvider({ children }) {
       value={{
         isAuthenticated: Boolean(session),
         role: session?.role ?? null,
-        singin: singinAdmin,
         singinAdmin,
         singinPatient,
         singout,
