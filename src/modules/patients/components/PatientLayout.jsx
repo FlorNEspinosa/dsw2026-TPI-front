@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
+import Alert from '../../shared/components/Alert';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -185,17 +186,8 @@ function PatientLayout() {
           </div>
         )}
       </header>
-
-      {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {logoutError && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-          >
-            {logoutError}
-          </div>
-        )}
+        <Alert message={logoutError} className="mb-4" />
         <Outlet />
       </main>
     </div>

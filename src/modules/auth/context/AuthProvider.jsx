@@ -2,6 +2,7 @@ import { createContext, useState } from 'react';
 import { loginAdmin } from '../services/adminLogin';
 import { loginPatient } from '../services/patientLogin';
 import { logout } from '../services/logout';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
 
 const AuthContext = createContext();
 
@@ -23,9 +24,10 @@ function AuthProvider({ children }) {
     } catch (error) {
       if (error.response?.status !== 401) {
         return {
-          error:
-            error.response?.data?.message ||
-            'No se pudo cerrar la sesión. Volvé a intentar.',
+          error: getApiErrorMessage(
+            error,
+            'No se pudo cerrar la sesión. Volvé a intentar.'
+          ),
         };
       }
     }

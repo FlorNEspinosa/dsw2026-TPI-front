@@ -3,6 +3,9 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import useAuth from '../../auth/hooks/useAuth';
+import Alert from '../../shared/components/Alert';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
+
 function PatientLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showDni, setShowDni] = useState(false);
@@ -43,17 +46,9 @@ function PatientLoginPage() {
         setErrorMessage(
           'Realizaste demasiados intentos. Esperá un minuto y volvé a intentar.'
         );
-      } else if (status >= 500) {
-        setErrorMessage(
-          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
-        );
-      } else if (error.response) {
-        setErrorMessage(
-          error.response.data?.message || 'No se pudo iniciar sesión.'
-        );
       } else {
         setErrorMessage(
-          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
+          getApiErrorMessage(error, 'No se pudo iniciar sesión.')
         );
       }
     }
@@ -248,11 +243,7 @@ function PatientLoginPage() {
             sistema te registrará automáticamente.
           </p>
 
-          {errorMessage && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center">
-              {errorMessage}
-            </div>
-          )}
+          <Alert message={errorMessage} className="text-xs text-center" />
         </form>
       </div>
 
