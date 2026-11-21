@@ -36,7 +36,6 @@ function PatientBookingForm({
       >
         <Input
           label="Motivo de consulta"
-          aria-label="Motivo de consulta"
           maxLength={300}
           error={errors.reason?.message}
           {...register('reason', {

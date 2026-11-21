@@ -151,34 +151,35 @@ function SpecialtiesPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Cabecera con Título, Buscador y Botón */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight text-med-text-main">
             Directorio de Especialidades
           </h1>
-          <p className="text-sm text-med-text-sub mt-1">
+          <p className="mt-1 text-xs text-med-text-sub">
             Administre las categorías médicas y sus descripciones.
           </p>
         </div>
 
-        {/* Botón Nueva Especialidad */}
-        <Button
-          onClick={() => navigate('/admin/specialties/new')}
-          disabled={isBusy}
-          className="w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          + Nueva Especialidad
-        </Button>
+        <div className="flex shrink-0 items-start gap-2">
+          <SpecialtiesFilters onSearch={handleSearch} isLoading={isBusy} />
+
+          <Button
+            onClick={() => navigate('/admin/specialties/new')}
+            disabled={isBusy}
+            className="whitespace-nowrap text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            + Nueva Especialidad
+          </Button>
+        </div>
       </div>
 
       <Snackbar notification={notification} onClose={handleCloseSnackbar} />
 
       <Alert message={deleteError} />
 
-      <SpecialtiesFilters onSearch={handleSearch} isLoading={isBusy} />
-
       <Card className="overflow-hidden">
-        <div className="mb-4 border-b border-med-border pb-4">
+        <div className="mb-5">
           <h2 className="text-base font-bold text-med-primary-900">
             Registros de Especialidades
           </h2>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
+import Alert from '../../shared/components/Alert';
+import Button from '../../shared/components/Button';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -100,21 +102,22 @@ function PatientLayout() {
             {/* Avatar Paciente */}
             <div className="flex items-center gap-2.5 pl-2 sm:border-l sm:border-med-border">
               <div className="w-8 h-8 rounded-full bg-med-primary-100 text-med-primary-900 font-bold text-xs flex items-center justify-center border border-med-primary-200">
-                JD
+                P
               </div>
               <span className="hidden sm:inline-block text-xs font-semibold text-med-text-main">
-                Johnathan Doe
+                Paciente
               </span>
             </div>
 
-            <button
+            <Button
+              variant="dangerGhost"
               type="button"
               onClick={handleLogout}
               disabled={isSigningOut}
-              className="hidden sm:inline-flex text-xs font-semibold text-med-text-sub hover:text-red-600 px-2.5 py-1.5 rounded-lg border border-med-border hover:bg-red-50/40 transition"
+              className="hidden sm:inline-flex text-xs font-semibold px-2.5 py-1.5 border border-med-border"
             >
               {isSigningOut ? 'Cerrando...' : 'Salir'}
-            </button>
+            </Button>
 
             {/* Botón hamburguesa móvil */}
             <button
@@ -171,31 +174,23 @@ function PatientLayout() {
             </NavLink>
             <div className="pt-2 border-t border-med-border-subtle flex items-center justify-between">
               <span className="text-xs font-medium text-med-text-sub">
-                Paciente: Johnathan Doe
+                Paciente
               </span>
-              <button
+              <Button
+                variant="dangerGhost"
                 type="button"
                 onClick={handleLogout}
                 disabled={isSigningOut}
-                className="text-xs font-bold text-red-600"
+                className="text-xs font-bold"
               >
                 {isSigningOut ? 'Cerrando...' : 'Cerrar sesión'}
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </header>
-
-      {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {logoutError && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-          >
-            {logoutError}
-          </div>
-        )}
+        <Alert message={logoutError} className="mb-4" />
         <Outlet />
       </main>
     </div>

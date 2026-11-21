@@ -154,30 +154,51 @@ function DoctorsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-med-text-main">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight text-med-text-main">
             Directorio de Doctores
           </h1>
 
-          <p className="text-sm text-med-text-sub mt-1">
-            Gestione el personal médico y sus horarios de atención.
+          <p className="mt-1 text-xs text-med-text-sub">
+            Gestione el personal médico y supervise su disponibilidad actual.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-start gap-2">
+          <NameFilter
+            onSearch={handleSearch}
+            isLoading={isBusy}
+            placeholder="Buscar doctor por nombre..."
+            inputId="doctor-name-filter"
+            compact
+          />
           <Button
-            variant="secondary"
             onClick={() => navigate('/admin/availabilities')}
             disabled={isBusy}
-            className="disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 whitespace-nowrap text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 7v5l3 2"
+              />
+            </svg>
             Agregar Disponibilidad Horaria
           </Button>
 
           <Button
             onClick={() => navigate('/admin/doctors/new')}
             disabled={isBusy}
-            className="disabled:opacity-50 disabled:cursor-not-allowed"
+            className="whitespace-nowrap text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             + Nuevo Doctor
           </Button>
@@ -186,15 +207,9 @@ function DoctorsPage() {
 
       <Snackbar notification={notification} onClose={closeSnackbar} />
       <Alert message={deleteError} />
-      <NameFilter
-        onSearch={handleSearch}
-        isLoading={isBusy}
-        placeholder="Ej.: Alejandro"
-        inputId="doctor-name-filter"
-      />
 
       <Card className="overflow-hidden">
-        <div className="mb-4 border-b border-med-border pb-4">
+        <div className="mb-5">
           <h2 className="text-base font-bold text-med-primary-900">
             Registros de Doctores
           </h2>

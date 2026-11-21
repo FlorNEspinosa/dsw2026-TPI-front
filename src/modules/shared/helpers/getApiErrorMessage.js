@@ -12,7 +12,14 @@ function getApiErrorMessage(
     return 'Ocurrió un error en el servidor. Intentá nuevamente más tarde.';
   }
 
-  return response.data?.message || fallback;
+  const details = response.data?.details;
+  const issues = Array.isArray(details)
+    ? details.map((detail) => detail?.issue).filter(Boolean)
+    : [];
+
+  return (
+    [response.data?.message, ...issues].filter(Boolean).join(' ') || fallback
+  );
 }
 
 export default getApiErrorMessage;

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
+import Alert from '../../shared/components/Alert';
+import Button from '../../shared/components/Button';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
@@ -155,11 +157,12 @@ function DashboardLayout() {
 
         {/* Footer Sidebar (Help, Logout & User profile) */}
         <div className="p-4 border-t border-med-border-subtle space-y-3">
-          <button
+          <Button
+            variant="dangerGhost"
             type="button"
             onClick={handleLogout}
             disabled={isSigningOut}
-            className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-med-text-sub hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+            className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium"
           >
             <svg
               className="w-4 h-4 text-med-text-muted"
@@ -175,7 +178,7 @@ function DashboardLayout() {
               />
             </svg>
             <span>{isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}</span>
-          </button>
+          </Button>
 
           {/* User Profile Info */}
           <div className="pt-3 border-t border-med-border flex items-center gap-3">
@@ -233,17 +236,8 @@ function DashboardLayout() {
             </svg>
           </button>
         </header>
-
-        {/* Contenido de Rutas Hijas */}
         <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
-          {logoutError && (
-            <div
-              role="alert"
-              className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-            >
-              {logoutError}
-            </div>
-          )}
+          <Alert message={logoutError} className="mb-4" />
           <Outlet />
         </main>
       </div>

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import Alert from '../../shared/components/Alert';
+import getApiErrorMessage from '../../shared/helpers/getApiErrorMessage';
+import Button from '../../shared/components/Button';
 
 function AdminLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -19,16 +22,7 @@ function AdminLoginPage() {
   const onValid = async (formData) => {
     setErrorMessage('');
     try {
-      const { error } = await singinAdmin(formData.email, formData.password);
-
-      if (error) {
-        setErrorMessage(
-          error.frontendErrorMessage || 'No se pudo iniciar sesión'
-        );
-
-        return;
-      }
-
+      await singinAdmin(formData.email, formData.password);
       navigate('/admin/home', { replace: true });
     } catch (error) {
       const status = error.response?.status;
@@ -39,17 +33,9 @@ function AdminLoginPage() {
         setErrorMessage(
           'Realizaste demasiados intentos. Esperá un minuto y volvé a intentar.'
         );
-      } else if (status >= 500) {
-        setErrorMessage(
-          'Ocurrió un error en el servidor. Intentá nuevamente más tarde.'
-        );
-      } else if (error.response) {
-        setErrorMessage(
-          error.response.data?.message || 'No se pudo iniciar sesión.'
-        );
       } else {
         setErrorMessage(
-          'No se pudo conectar con el backend. Comprobá que esté ejecutándose.'
+          getApiErrorMessage(error, 'No se pudo iniciar sesión.')
         );
       }
     }
@@ -234,25 +220,21 @@ function AdminLoginPage() {
             </div>
 
             {/* Botón de Submit */}
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting}
               className="mt-2 w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{isSubmitting ? 'Ingresando...' : 'Iniciar Sesión'}</span>
               <span className="text-sm">→</span>
-            </button>
+            </Button>
 
             <p className="text-center text-xs text-med-text-sub">
               Ingresá con las credenciales del administrador del sistema.
             </p>
 
             {/* Error Message */}
-            {errorMessage && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center">
-                {errorMessage}
-              </div>
-            )}
+            <Alert message={errorMessage} className="text-xs text-center" />
           </form>
         </div>
 
